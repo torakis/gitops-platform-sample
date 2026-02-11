@@ -1,0 +1,69 @@
+# Kyverno policies - baseline guardrails
+# Install: helm install kyverno kyverno/kyverno -n kyverno
+# Apply: kubectl apply -f platform/guardrails/kyverno-policies.yaml
+#
+# These policies require resources.requests and limits on Deployments.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+  annotations:
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/description: Require CPU and memory limits on containers
+spec:
+  validationFailureAction: Audit
+  rules:
+  - name: check-resources
+    match:
+      any:
+      - resources:
+          kinds:
+          - Deployment
+          namespaces:
+          - dev
+          - staging
+          - prod
+    validate:
+      message: "Containers must have resources.requests and resources.limits"
+      pattern:
+        spec:
+          template:
+            spec:
+              containers:
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+---
+# Require liveness and readiness probes
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-probes
+  annotations:
+    policies.kyverno.io/category: Best Practices
+spec:
+  validationFailureAction: Audit
+  rules:
+  - name: check-probes
+    match:
+      any:
+      - resources:
+          kinds:
+          - Deployment
+          namespaces:
+          - dev
+          - staging
+          - prod
+    validate:
+      message: "Containers must have livenessProbe and readinessProbe"
+      pattern:
+        spec:
+          template:
+            spec:
+              containers:
+              - livenessProbe: "?*"
+                readinessProbe: "?*"

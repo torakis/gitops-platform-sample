@@ -1,0 +1,68 @@
+# Apps App - deploys orders-api, orders-web, worker
+# Uses Kustomize overlays: dev, staging, prod
+# REPO_URL: Replace with your repo
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-dev
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: deploy/overlays/dev
+    targetRevision: main
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-staging
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: deploy/overlays/staging
+    targetRevision: main
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-prod
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: deploy/overlays/prod
+    targetRevision: main
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false

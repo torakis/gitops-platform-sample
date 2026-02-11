@@ -1,0 +1,31 @@
+# Least-privilege Roles (namespaced)
+# orders-api: read/write its own config, get pods for debugging
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: orders-api
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  resourceNames: ["orders-api-config", "orders-db-secret"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: orders-web
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: worker
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["orders-db-secret"]
+  verbs: ["get"]

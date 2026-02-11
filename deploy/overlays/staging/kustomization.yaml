@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging
+
+# NO postgres - use external managed DB. Create orders-db-secret before apply.
+resources:
+- ../../base/orders-api
+- ../../base/orders-web
+- ../../base/worker
+- ../../base/rbac
+- ../../base/networkpolicy
+- external-db-secret-placeholder.yaml
+- ingress.yaml
+
+patches:
+- target:
+    kind: RoleBinding
+    name: orders-api
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: staging
+- target:
+    kind: RoleBinding
+    name: orders-web
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: staging
+- target:
+    kind: RoleBinding
+    name: worker
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: staging
+
+# Staging: moderate resources
+- target:
+    kind: Deployment
+    name: orders-api
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 2
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: "200m"
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: "512Mi"
+
+commonLabels:
+  env: staging

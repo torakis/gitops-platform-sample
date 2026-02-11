@@ -1,0 +1,23 @@
+# ServiceMonitor for orders-api
+# Requires: Prometheus Operator (monitoring.coreos.com)
+# If not using Prometheus Operator, configure Prometheus scrape configs manually.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: orders-api
+  labels:
+    app: orders-api
+spec:
+  selector:
+    matchLabels:
+      app: orders-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+  namespaceSelector:
+    matchNames:
+    - dev
+    - staging
+    - prod

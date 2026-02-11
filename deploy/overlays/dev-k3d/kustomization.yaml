@@ -1,0 +1,71 @@
+# Dev overlay for k3d (uses Traefik ingress, k3d default)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dev
+
+resources:
+- ../../base/orders-api
+- ../../base/orders-web
+- ../../base/worker
+- ../../base/postgres
+- ../../base/rbac
+# - ../../base/networkpolicy  # Excluded for k3d: policies expect nginx; Traefik would be blocked
+- ingress.yaml
+
+patches:
+- target:
+    kind: ConfigMap
+    name: orders-api-config
+  patch: |-
+    - op: replace
+      path: /data/FeatureFlags__EnableDiscounts
+      value: "true"
+- target:
+    kind: RoleBinding
+    name: orders-api
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: dev
+- target:
+    kind: RoleBinding
+    name: orders-web
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: dev
+- target:
+    kind: RoleBinding
+    name: worker
+  patch: |-
+    - op: add
+      path: /subjects/0/namespace
+      value: dev
+- target:
+    kind: Deployment
+    name: orders-api
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: "50m"
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: "128Mi"
+- target:
+    kind: Deployment
+    name: orders-web
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: "64Mi"
+- target:
+    kind: Deployment
+    name: worker
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: "64Mi"
+
+commonLabels:
+  env: dev

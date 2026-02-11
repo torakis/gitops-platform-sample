@@ -1,0 +1,10 @@
+# Overrides for kind (local)
+# helm upgrade --install argocd argo/argo-cd -n argocd -f argocd/install/values.yaml -f argocd/install/values-kind.yaml
+server:
+  service:
+    type: NodePort
+  extraArgs:
+    - --insecure
+configs:
+  params:
+    server.insecure: "true"

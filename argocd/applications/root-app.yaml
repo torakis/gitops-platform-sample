@@ -1,0 +1,27 @@
+# Root Application - App of Apps
+# Syncs projects/ + platform-app + apps-app. Apply manually after Argo CD install.
+#
+# REPO_URL: Replace with your repo
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: argocd
+    targetRevision: main
+    directory:
+      recurse: true
+      exclude: 'root-app|install|README'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

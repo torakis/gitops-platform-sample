@@ -1,0 +1,16 @@
+# MISCONFIG: Readiness probe path does not exist
+# Symptom: Pods stuck in Not Ready, rollout never completes
+# Fix: Change path from /nonexistent to /readyz
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        readinessProbe:
+          httpGet:
+            path: /nonexistent
+            port: 5000

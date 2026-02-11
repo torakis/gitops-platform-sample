@@ -1,0 +1,17 @@
+# MISCONFIG: Memory limit less than request
+# Symptom: Pod fails with CreateContainerConfigError or Invalid
+# Fix: Ensure limits >= requests (e.g. memory limit 512Mi)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        resources:
+          requests:
+            memory: "512Mi"
+          limits:
+            memory: "256Mi"

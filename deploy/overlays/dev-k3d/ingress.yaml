@@ -1,0 +1,27 @@
+# Ingress for k3d (Traefik is default; no nginx needed)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orders-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: dev.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: orders-web
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: orders-api
+            port:
+              number: 5000

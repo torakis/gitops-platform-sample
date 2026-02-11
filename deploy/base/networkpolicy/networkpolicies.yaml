@@ -1,0 +1,81 @@
+# NetworkPolicies: web->api, api->db, worker->db. Restrictive by default.
+# Requires: CNI with NetworkPolicy support (Calico, Cilium, etc.)
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-web
+spec:
+  podSelector:
+    matchLabels:
+      app: orders-web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-to-api
+spec:
+  podSelector:
+    matchLabels:
+      app: orders-api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: orders-web
+    ports:
+    - protocol: TCP
+      port: 5000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-db
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: orders-api
+    - podSelector:
+        matchLabels:
+          app: worker
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress: []
+# Note: Egress is allowed by default. For stricter egress (DNS + app-to-app only),
+# add separate egress policies per workload.

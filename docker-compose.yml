@@ -1,0 +1,49 @@
+# Local development: run all services without Kubernetes
+# Usage: docker compose up -d
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orders
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  orders-api:
+    build: ./apps/orders-api
+    ports:
+      - "5000:5000"
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=orders;Username=postgres;Password=postgres"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  orders-web:
+    build:
+      context: ./apps/orders-web
+      args:
+        VITE_API_URL: "http://localhost:5000"
+    ports:
+      - "3000:8080"
+    depends_on:
+      - orders-api
+
+  worker:
+    build: ./apps/worker
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=orders;Username=postgres;Password=postgres"
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      postgres:
+        condition: service_healthy

@@ -1,0 +1,10 @@
+# Overrides for AKS
+# helm upgrade --install argocd argo/argo-cd -n argocd -f argocd/install/values.yaml -f argocd/install/values-aks.yaml
+server:
+  replicas: 1
+  service:
+    type: LoadBalancer
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3

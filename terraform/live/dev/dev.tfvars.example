@@ -1,0 +1,17 @@
+resource_group_name = "rg-gitops-dev"
+location            = "eastus"
+prefix              = "gitops-dev"
+cluster_name        = "aks-gitops-dev"
+dns_prefix          = "gitops-dev"
+acr_name            = "gitopsplatformdev"  # Must be globally unique, alphanumeric only
+
+system_node_count   = 1
+user_node_count     = 2
+user_enable_auto_scaling = true
+user_min_count      = 1
+user_max_count      = 5
+
+tags = {
+  env   = "dev"
+  owner = "platform-team"
+}

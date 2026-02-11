@@ -1,0 +1,28 @@
+# PrometheusRule: orders app alerts
+# Requires: Prometheus Operator
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: orders-alerts
+  labels:
+    prometheus: platform
+spec:
+  groups:
+  - name: orders.rules
+    rules:
+    - alert: OrdersApiDown
+      expr: up{job="orders-api"} == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "orders-api is down"
+        description: "orders-api has been down for more than 2 minutes"
+    - alert: OrdersApiHighErrorRate
+      expr: rate(http_requests_received_total{job="orders-api",code=~"5.."}[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "orders-api high error rate"

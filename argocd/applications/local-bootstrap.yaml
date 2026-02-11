@@ -1,0 +1,44 @@
+# Local k3d bootstrap: namespaces + apps-dev only (no nginx, uses k3d Traefik)
+# Apply: kubectl apply -f argocd/applications/local-bootstrap.yaml -n argocd
+# Set repoURL to your fork, e.g. https://github.com/myuser/gitops-platform-sample.git
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-bootstrap
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: platform/environments
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-dev
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    path: deploy/overlays/dev-k3d
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

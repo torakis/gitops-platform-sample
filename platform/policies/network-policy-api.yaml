@@ -1,0 +1,41 @@
+# NetworkPolicy: orders-api
+# Allows ingress from ingress controller and orders-web; egress to postgres and internet (for external APIs).
+# Apply to namespace where orders-api runs (e.g. dev).
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: orders-api-netpol
+spec:
+  podSelector:
+    matchLabels:
+      app: orders-api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: orders-web
+    - podSelector:
+        matchLabels:
+          app: ingress-nginx
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53

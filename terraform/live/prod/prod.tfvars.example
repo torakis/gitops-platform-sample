@@ -1,0 +1,19 @@
+resource_group_name = "rg-gitops-prod"
+location            = "eastus"
+prefix              = "gitops-prod"
+cluster_name        = "aks-gitops-prod"
+dns_prefix          = "gitops-prod"
+acr_name            = "gitopsplatformprod"
+vnet_address_space  = "10.0.0.0/16"
+aks_subnet_prefix   = "10.0.1.0/24"
+acr_sku             = "Basic"
+
+system_node_count   = 2
+system_node_vm_size = "Standard_D2s_v3"
+user_node_count     = 3
+user_node_vm_size   = "Standard_D2s_v3"
+user_enable_auto_scaling = true
+user_min_count      = 3
+user_max_count      = 10
+
+tags = { env = "prod" }

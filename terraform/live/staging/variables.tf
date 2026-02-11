@@ -1,0 +1,17 @@
+variable "resource_group_name" { type = string }
+variable "location"            { type = string }
+variable "prefix"              { type = string }
+variable "cluster_name"        { type = string }
+variable "dns_prefix"          { type = string }
+variable "acr_name"            { type = string }
+variable "vnet_address_space"  { type = string }
+variable "aks_subnet_prefix"   { type = string }
+variable "acr_sku"             { type = string }
+variable "system_node_count"   { type = number }
+variable "system_node_vm_size" { type = string }
+variable "user_node_count"     { type = number }
+variable "user_node_vm_size"   { type = string }
+variable "user_enable_auto_scaling" { type = bool }
+variable "user_min_count"      { type = number }
+variable "user_max_count"      { type = number }
+variable "tags"                { type = map(string) }

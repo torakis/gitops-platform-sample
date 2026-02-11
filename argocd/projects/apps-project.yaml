@@ -1,0 +1,23 @@
+# AppProject: apps - for business workloads
+# Scoped to dev, staging, prod namespaces only
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Business applications (orders-api, orders-web, worker)
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: dev
+    server: https://kubernetes.default.svc
+  - namespace: staging
+    server: https://kubernetes.default.svc
+  - namespace: prod
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace

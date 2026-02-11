@@ -1,0 +1,34 @@
+# Minimal values for kind/k3d (lower resource usage)
+# Full chart: https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+
+prometheus:
+  prometheusSpec:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+grafana:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  adminPassword: prom-operator
+
+alertmanager:
+  enabled: false
+
+# Reduce node-exporter footprint on small clusters
+nodeExporter:
+  enabled: true
+
+# Prometheus Operator discovers ServiceMonitors cluster-wide by default
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi

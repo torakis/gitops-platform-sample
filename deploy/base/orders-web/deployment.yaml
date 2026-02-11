@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-web
+  labels:
+    app: orders-web
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: orders-web
+  template:
+    metadata:
+      labels:
+        app: orders-web
+    spec:
+      serviceAccountName: orders-web
+      containers:
+      - name: web
+        image: orders-web:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-web
+  labels:
+    app: orders-web
+spec:
+  selector:
+    app: orders-web
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http

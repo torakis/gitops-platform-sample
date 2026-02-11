@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Print /etc/hosts entries for local development.
+set -euo pipefail
+
+echo "=== Add these lines to /etc/hosts ==="
+echo ""
+echo "# gitops-platform-sample local dev"
+echo "127.0.0.1 dev.local"
+echo ""
+echo "# Optional: staging/prod if you run them locally"
+echo "# 127.0.0.1 staging.example.com"
+echo "# 127.0.0.1 orders.example.com"
+echo ""
+echo "=== Commands to add (macOS/Linux) ==="
+echo ""
+echo "# Append (requires sudo):"
+echo "echo '127.0.0.1 dev.local' | sudo tee -a /etc/hosts"
+echo ""
+echo "# Or edit manually:"
+echo "sudo nano /etc/hosts  # or sudo vim /etc/hosts"
+echo ""
+echo "=== Verify ==="
+echo "ping -c 1 dev.local  # should resolve to 127.0.0.1"
+echo "curl -s -o /dev/null -w '%{http_code}' http://dev.local/  # expect 200 after deploy"

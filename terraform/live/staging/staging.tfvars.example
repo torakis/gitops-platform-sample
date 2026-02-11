@@ -1,0 +1,19 @@
+resource_group_name = "rg-gitops-staging"
+location            = "eastus"
+prefix              = "gitops-stg"
+cluster_name        = "aks-gitops-staging"
+dns_prefix          = "gitops-stg"
+acr_name            = "gitopsplatformstg"
+vnet_address_space  = "10.0.0.0/16"
+aks_subnet_prefix   = "10.0.1.0/24"
+acr_sku             = "Basic"
+
+system_node_count   = 1
+system_node_vm_size = "Standard_D2s_v3"
+user_node_count     = 3
+user_node_vm_size   = "Standard_D2s_v3"
+user_enable_auto_scaling = true
+user_min_count      = 2
+user_max_count      = 8
+
+tags = { env = "staging" }
