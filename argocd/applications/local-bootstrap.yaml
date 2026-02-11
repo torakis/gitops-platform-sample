@@ -12,7 +12,7 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    repoURL: https://github.com/torakis/gitops-platform-sample.git
     path: platform/environments
     targetRevision: main
   destination:
@@ -32,7 +32,7 @@ metadata:
 spec:
   project: apps
   source:
-    repoURL: https://github.com/your-org/gitops-platform-sample.git
+    repoURL: https://github.com/torakis/gitops-platform-sample.git
     path: deploy/overlays/dev-k3d
     targetRevision: main
   destination:
