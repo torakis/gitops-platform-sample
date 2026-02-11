@@ -23,6 +23,7 @@ spec:
       containers:
       - name: api
         image: orders-api:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
           name: http

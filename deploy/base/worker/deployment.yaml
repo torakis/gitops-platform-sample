@@ -23,6 +23,7 @@ spec:
       containers:
       - name: worker
         image: worker:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5001
           name: http

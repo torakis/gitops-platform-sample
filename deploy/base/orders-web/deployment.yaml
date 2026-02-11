@@ -23,6 +23,7 @@ spec:
       containers:
       - name: web
         image: orders-web:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
           name: http
