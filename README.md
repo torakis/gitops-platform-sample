@@ -28,7 +28,7 @@ A hands-on learning mono-repo for **GitOps**, **Argo CD**, **Terraform**, **Plat
 | 4 | Set your repo URL | `sed -i.bak 's|your-org|YOUR_GITHUB_USER|g' argocd/applications/local-bootstrap.yaml` |
 | 5 | Bootstrap Argo apps | `./scripts/bootstrap.sh` |
 | 6 | Build and load images | `./scripts/build-images-local.sh` |
-| 7 | Add hosts entry | `echo '127.0.0.1 dev.local' | sudo tee -a /etc/hosts` |
+| 7 | Add hosts entry | `echo '127.0.0.1 dev.local argo.dev.local' | sudo tee -a /etc/hosts` |
 | 8 | Wait for sync (~2 min), verify | `kubectl get pods -n dev` |
 
 ### Path B: Without Argo CD (Manual)
@@ -47,7 +47,7 @@ A hands-on learning mono-repo for **GitOps**, **Argo CD**, **Terraform**, **Plat
 | Action | Command or URL |
 |--------|----------------|
 | Open app | http://dev.local |
-| Argo CD UI (Path A only) | `kubectl port-forward svc/argocd-server -n argocd 8080:443` then https://localhost:8080 |
+| Argo CD UI (Path A only) | http://argo.dev.local (no port-forward needed) |
 
 ---
 

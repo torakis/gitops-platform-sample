@@ -1,10 +1,16 @@
-# Overrides for kind (local)
+# Overrides for kind/k3d (local)
 # helm upgrade --install argocd argo/argo-cd -n argocd -f argocd/install/values.yaml -f argocd/install/values-kind.yaml
 server:
   service:
     type: NodePort
   extraArgs:
     - --insecure
+  ingress:
+    enabled: true
+    hostname: argo.dev.local
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web
 configs:
   params:
     server.insecure: "true"
