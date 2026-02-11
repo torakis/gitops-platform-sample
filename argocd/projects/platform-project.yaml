@@ -12,6 +12,9 @@ spec:
   sourceRepos:
   - '*'
   destinations:
+  # Cluster-scoped (Namespace resources from platform/environments)
+  - server: https://kubernetes.default.svc
+    namespace: ''
   - namespace: argocd
     server: https://kubernetes.default.svc
   - namespace: ingress-nginx
