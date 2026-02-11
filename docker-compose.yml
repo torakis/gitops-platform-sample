@@ -1,6 +1,5 @@
 # Local development: run all services without Kubernetes
 # Usage: docker compose up -d
-version: '3.8'
 
 services:
   postgres:
@@ -20,7 +19,7 @@ services:
   orders-api:
     build: ./apps/orders-api
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=orders;Username=postgres;Password=postgres"
       ASPNETCORE_ENVIRONMENT: Development
@@ -33,7 +32,7 @@ services:
     build:
       context: ./apps/orders-web
       args:
-        VITE_API_URL: "http://localhost:5000"
+        VITE_API_URL: "http://localhost:5001"
     ports:
       - "3000:8080"
     depends_on:
