@@ -312,17 +312,36 @@ Argo CD will create Applications for each file in `argocd/applications/` (client
 
 ---
 
-## Part 4: Expose Argo CD on Port 8080 (Nginx Reverse Proxy)
+## Part 4: Expose Argo CD to the Internet
 
-Argo CD with `--insecure` serves HTTP on port 80. Nginx proxies to the HTTP NodePort.
+### Option A: Firewall + NodePort (simplest)
 
-1. Get the Argo CD HTTP NodePort:
+1. Open the NodePort (e.g. 30443) in your firewall or cloud security group.
+
+**UFW (Ubuntu):**
 
 ```bash
-kubectl get svc argocd-server -n argocd
+sudo ufw allow 30443/tcp
+sudo ufw allow 22/tcp
+sudo ufw enable
 ```
 
-Note the NodePort for port 80 (e.g. `80:30080/TCP,443:30443/TCP` → use **30080**).
+**Cloud (e.g. AWS, GCP, Azure):**  
+Open TCP port 30443 in the VM’s security group / firewall rules.
+
+2. Access: `https://<VM-PUBLIC-IP>:30443`  
+Accept the self-signed certificate.
+
+### Option B: Nginx Reverse Proxy on Port 8080 (permanent, recommended)
+
+Exposes Argo CD on port 8080 via Nginx. Survives Argo CD upgrades and avoids random NodePorts.
+
+1. Get the Argo CD NodePort:
+
+```bash
+kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[0].nodePort}'
+# Example output: 30443
+```
 
 2. Install Nginx:
 
@@ -331,7 +350,7 @@ sudo apt update
 sudo apt install -y nginx
 ```
 
-3. Create Nginx config (replace `30080` with your NodePort for port 80 from step 1):
+3. Create Nginx config (replace `30443` with your NodePort from step 1):
 
 ```bash
 sudo tee /etc/nginx/sites-available/argocd <<'EOF'
@@ -339,7 +358,8 @@ server {
     listen 8080;
     server_name _;
     location / {
-        proxy_pass http://127.0.0.1:30080;
+        proxy_pass https://127.0.0.1:30443;
+        proxy_ssl_verify off;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -370,7 +390,59 @@ sudo ufw allow 22/tcp
 sudo ufw enable
 ```
 
-6. Access: **http://\<VM-IP\>:8080/** (use HTTP, not HTTPS). Example: **http://192.168.174.250:8080/**
+6. Access: `https://<VM-PUBLIC-IP>:8080`  
+Accept the self-signed certificate. Works from the internet if the VM has a public IP and port 8080 is opened in the cloud security group.
+
+### Option C: Nginx Reverse Proxy + TLS (with domain)
+
+Requires a domain (e.g. `argocd.yourdomain.com`) pointing to your VM. Use port 80/443 with Certbot for proper TLS.
+
+1. Install Nginx and Certbot:
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+2. Create Nginx config (replace `30443` with your NodePort from `kubectl get svc argocd-server -n argocd`):
+
+```bash
+sudo tee /etc/nginx/sites-available/argocd <<'EOF'
+server {
+    listen 80;
+    server_name argocd.yourdomain.com;
+    location / {
+        proxy_pass https://127.0.0.1:30443;
+        proxy_ssl_verify off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+```
+
+3. Enable and get TLS:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/argocd /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+sudo certbot --nginx -d argocd.yourdomain.com
+```
+
+4. Access: `https://argocd.yourdomain.com`
+
+### Option D: Cloudflare Tunnel (no open ports)
+
+If you use Cloudflare for DNS:
+
+1. Install cloudflared on the VM.
+2. Create a tunnel and route `argocd.yourdomain.com` to `https://localhost:30443`.
+3. No firewall changes needed; traffic enters via Cloudflare.
 
 ---
 
@@ -379,7 +451,7 @@ sudo ufw enable
 | Task | Command |
 |------|---------|
 | Get Argo CD password | `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' \| base64 -d` |
-| Get NodePorts | `kubectl get svc argocd-server -n argocd` (use port 80 NodePort, e.g. 30080) |
+| Get NodePort | `kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[0].nodePort}'` |
 | List applications | `argocd app list` (or Argo CD UI) |
 | Sync app | `argocd app sync client-a-staging` |
 | Restart Argo CD server | `kubectl rollout restart deployment argocd-server -n argocd` |
@@ -413,6 +485,6 @@ sudo ufw enable
 
 **Can't access UI**
 
-- Use **http://** not https:// (Nginx serves plain HTTP on 8080).
-- Confirm NodePort: `kubectl get svc argocd-server -n argocd`. Use the port 80 NodePort (e.g. 30080) in `proxy_pass`, not 443.
-- Check firewall: `sudo ufw allow 8080/tcp`.
+- Confirm NodePort with `kubectl get svc argocd-server -n argocd`.
+- Check firewall/security group.
+- If using Nginx: ensure `proxy_pass` uses correct NodePort.
