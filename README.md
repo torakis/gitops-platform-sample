@@ -115,6 +115,7 @@ Requires: `az login`, Azure subscription.
 | Doc | Purpose |
 |-----|---------|
 | [how-it-works.md](docs/how-it-works.md) | Repo modules, GitOps flow, architecture |
+| [argocd-management-vm-setup.md](docs/argocd-management-vm-setup.md) | Ubuntu VM → k3s → Argo CD → GitOps repo → internet access |
 | [local-deploy-gitops.md](docs/local-deploy-gitops.md) | End-to-end Argo CD: bootstrap, sync, drift, prune |
 | [local-dev.md](docs/local-dev.md) | Run API + web locally, postgres in cluster |
 | [troubleshooting-local.md](docs/troubleshooting-local.md) | Image pull, ingress, port-forward, RBAC, DNS |
